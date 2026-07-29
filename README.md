@@ -1,0 +1,2 @@
+# voxscribe
+live translation sidebar
