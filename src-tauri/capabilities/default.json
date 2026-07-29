@@ -1,0 +1,18 @@
+{
+  "identifier": "default",
+  "description": "Default capability set for VoxScribe",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-toggle-visibility",
+    "core:window:allow-set-position",
+    "core:window:allow-set-size",
+    "core:event:default",
+    "core:event:allow-listen",
+    "core:event:allow-emit"
+  ]
+}

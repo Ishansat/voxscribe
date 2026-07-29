@@ -1,0 +1,36 @@
+{
+  "name": "voxscribe",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:dev:metal": "TAURI_GPU_MODE=metal tauri dev",
+    "tauri:dev:cuda": "TAURI_GPU_MODE=cuda tauri dev",
+    "tauri:dev:vulkan": "TAURI_GPU_MODE=vulkan tauri dev",
+    "tauri:dev:cpu": "TAURI_GPU_MODE=cpu tauri dev"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "@tauri-apps/api": "^2.0.0",
+    "tailwindcss": "^3.4.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.0",
+    "@tauri-apps/cli": "^2.0.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0"
+  }
+}
