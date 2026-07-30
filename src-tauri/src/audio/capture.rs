@@ -116,14 +116,12 @@ impl AudioCapture {
                         }
                     }
 
-                    if let Some(ref rx) = loopback_rx {
-                        if let Ok(chunk) = rx.try_recv() {
-                            if let Some(ref mut resampler) = loopback_resampler {
-                                let resampled = resampler.process(&chunk);
-                                loopback_buf.extend(resampled);
-                            } else {
-                                loopback_buf.extend(chunk);
-                            }
+                    if let Ok(chunk) = loopback_rx.try_recv() {
+                        if let Some(ref mut resampler) = loopback_resampler {
+                            let resampled = resampler.process(&chunk);
+                            loopback_buf.extend(resampled);
+                        } else {
+                            loopback_buf.extend(chunk);
                         }
                     }
 
@@ -296,6 +294,8 @@ impl AudioStream {
         self.target_sample_rate
     }
 }
+
+unsafe impl Send for AudioStream {}
 
 impl Drop for AudioStream {
     fn drop(&mut self) {

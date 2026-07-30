@@ -4,12 +4,14 @@ mod detector;
 mod whisper;
 mod translation;
 
+use commands::SessionManager;
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .manage(SessionManager::new())
         .setup(|app| {
             let tray = tauri::tray::TrayIconBuilder::new()
                 .menu(
@@ -21,7 +23,13 @@ pub fn run() {
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "toggle" => {
                         if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.toggle_visibility();
+                            if let Ok(visible) = window.is_visible() {
+                                if visible {
+                                    let _ = window.hide();
+                                } else {
+                                    let _ = window.show();
+                                }
+                            }
                         }
                     }
                     "quit" => {

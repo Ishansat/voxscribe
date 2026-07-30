@@ -3,6 +3,7 @@ use std::sync::Arc;
 use chrono::Utc;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter};
+use tokio::sync::mpsc;
 use uuid::Uuid;
 
 use super::capture::AudioStream;
@@ -79,6 +80,28 @@ impl AudioPipeline {
         }
     }
 
+    pub async fn run_with_receiver(
+        &self,
+        mut rx: mpsc::Receiver<Vec<f32>>,
+        sample_rate: u32,
+    ) {
+        let vad_config = VadConfig {
+            sample_rate,
+            ..Default::default()
+        };
+        let mut vad = VoiceActivityDetector::new(vad_config);
+
+        while let Some(chunk) = rx.recv().await {
+            if let Some(segment) = vad.push_frame(&chunk) {
+                self.process_segment(segment).await;
+            }
+        }
+
+        if let Some(segment) = vad.flush() {
+            self.process_segment(segment).await;
+        }
+    }
+
     async fn process_segment(&self, segment: SpeechSegment) {
         let app = self.app_handle.clone();
         let whisper = self.whisper.clone();
@@ -87,12 +110,24 @@ impl AudioPipeline {
         let target_lang = self.target_lang.clone();
 
         tokio::spawn(async move {
-            let transcribed = whisper.transcribe(&segment.samples);
+            let transcribed = match whisper.transcribe(&segment.samples) {
+                Ok(t) => t,
+                Err(e) => {
+                    eprintln!("transcription error: {}", e);
+                    return;
+                }
+            };
 
             let translated = if source_lang == target_lang {
                 transcribed.clone()
             } else {
-                translator.translate(&transcribed, &source_lang, &target_lang)
+                match translator.translate(&transcribed, &source_lang, &target_lang).await {
+                    Ok(t) => t,
+                    Err(e) => {
+                        eprintln!("translation error: {}", e);
+                        return;
+                    }
+                }
             };
 
             let payload = TranscriptBlockPayload::new(
